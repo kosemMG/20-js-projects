@@ -1,8 +1,34 @@
+'use strict';
+
 const form = document.getElementById('form');
-const username = document.getElementById('username');
-const email = document.getElementById('email');
-const password = document.getElementById('password');
-const password2 = document.getElementById('password2');
+const usernameInput = document.getElementById('username');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const password2Input = document.getElementById('password2');
+
+const inputsValidators = {
+  username: [required, length(3, 12)],
+  email: [required, email],
+  password: [required, length(6, 20)],
+  password2: [required, password2]
+};
+
+// Validate.
+function validate(inputsArr, validators) {
+  if (inputsArr && inputsArr.length > 0) {
+    inputsArr.forEach(input => {
+      let isInvalid;
+      for (const validator of validators[input.id]) {
+        isInvalid = validator(input);
+        if (isInvalid) {
+          break;
+        }
+      }
+      const result = isInvalid ? 'error' : 'success';
+      showResult(input, result, isInvalid);
+    });
+  }
+}
 
 // Show input result.
 function showResult(input, result, message = null) {
@@ -21,54 +47,42 @@ function showResult(input, result, message = null) {
 }
 
 // Check email.
-function checkEmail(emailInput) {
-  let result = 'success';
-  let message = null;
+function email(emailInput) {
   const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   if (!regex.test(emailInput.value.trim().toLowerCase())) {
-    result = 'error';
-    message = 'Email is invalid';
+    return 'Invalid email';
   }
-  showResult(emailInput, result, message);
+  return null;
 }
 
 // Check required.
-function checkRequired(inputArr) {
-  inputArr.forEach(input => {
-    let result = 'success';
-    let message = null;
-    if (input.value.trim() === '') {
-      result = 'error';
-      message = '* Required';
-    }
-    showResult(input, result, message);
-  });
+function required(input) {
+  if (input.value.trim() === '') {
+    return '* Required';
+  }
+  return null;
 }
 
 // Check length.
-function checkLength(input, min, max) {
-  const inputLength = input.value.length;
-  let result = 'success';
-  let message = null;
-  if (inputLength < min || inputLength > max) {
-    result = 'error';
-    message = `Must be between ${min} to ${max} characters.`;
-  }
-  showResult(input, result, message);
+function length(min, max) {
+  return function(input) {
+    const inputLength = input.value.length;
+    if (inputLength < min || inputLength > max) {
+      return `Must be between ${min} to ${max} characters.`;
+    }
+    return null;
+  };
 }
 
 // Check passwords match.
-function checkPasswordsMatch(input1, input2) {
-  if (input1.value !== input2.value) {
-    showResult(input2, 'error', 'Passwords do not match.');
+function password2(input) {
+  if (input.value === '' || input.value !== passwordInput.value) {
+    return 'Passwords do not match';
   }
+  return null;
 }
 
 form.addEventListener('submit', event => {
   event.preventDefault();
-  checkRequired([username, email, password, password2]);
-  checkLength(username, 3, 10);
-  checkLength(password, 6, 16);
-  checkEmail(email);
-  checkPasswordsMatch(password, password2);
+  validate([usernameInput, emailInput, passwordInput, password2Input], inputsValidators);
 });
