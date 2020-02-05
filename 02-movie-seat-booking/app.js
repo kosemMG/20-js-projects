@@ -35,7 +35,7 @@ function populateUI() {
   }
   const selectedMovieIdx = +localStorage.getItem('selected-movie-index');
   selectedMovieIdx && (movieSelect.selectedIndex = selectedMovieIdx);
-  ticketPrice = +localStorage.getItem('selected-movie-price');
+  ticketPrice = +localStorage.getItem('selected-movie-price') || +movieSelect.value;
   updateInfo();
 }
 
